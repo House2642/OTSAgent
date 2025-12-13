@@ -42,6 +42,7 @@ def embed_data():
             content,
             embedding
         ))
+        
 if __name__ == "__main__":
     # Clear first
     execute("DELETE FROM opportunities")
