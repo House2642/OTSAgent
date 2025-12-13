@@ -14,7 +14,7 @@ def get_conn():
 def init_db():
     conn = get_conn()
     cur = conn.cursor()
-
+    #cur.execute("DROP TABLE IF EXISTS opportunities")
     cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
     #opportunities table
     cur.execute("""
@@ -30,6 +30,8 @@ def init_db():
             stage TEXT,
             probability DECIMAL,
             loss_reason TEXT,
+            created_date DATE,
+            schedule_date DATE,
             content TEXT,
             embedding vector(1536) 
         )
