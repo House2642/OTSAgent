@@ -40,7 +40,7 @@ salesbot.add_edge(START, "QA")
 salesbot.add_conditional_edges("QA", tools_condition)
 salesbot.add_edge("tools", "QA")
 
-app = salesbot.compile()
+sf_app = salesbot.compile()
 
 if __name__ == "__main__":
     messages = []
