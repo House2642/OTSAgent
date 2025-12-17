@@ -9,6 +9,7 @@ def load_data():
     df['Schedule Date'] = pd.to_datetime(df['Schedule Date'])
     one_year_ago = datetime.now() - timedelta(days=365)
     salesforce_data = df[df['Schedule Date'] >= one_year_ago]
+    print(f"✓ Loaded {len(salesforce_data)} rows (from {len(df)} total)")
     return salesforce_data
 
 def safe_val(val):
