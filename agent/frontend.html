@@ -3,21 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Overtime RFP Agent</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>Overtime Sales Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0a0a0b;
-            --bg-secondary: #141416;
-            --bg-tertiary: #1c1c1f;
-            --accent: #ff4d00;
-            --accent-hover: #ff6a2a;
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --bg-tertiary: #141414;
+            --bg-card: #1a1a1a;
+            --accent: #FF4D00;
+            --accent-hover: #FF6A2A;
+            --accent-glow: rgba(255, 77, 0, 0.3);
             --text-primary: #ffffff;
-            --text-secondary: #a1a1aa;
-            --text-muted: #71717a;
-            --border: #27272a;
-            --user-bg: linear-gradient(135deg, #ff4d00 0%, #ff6a2a 100%);
-            --assistant-bg: #1c1c1f;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --border: #2a2a2a;
+            --success: #00C853;
+            --user-bg: linear-gradient(135deg, #FF4D00 0%, #FF6A2A 100%);
+            --assistant-bg: #1a1a1a;
         }
 
         * {
@@ -27,7 +30,7 @@
         }
 
         body {
-            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
@@ -51,23 +54,25 @@
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--user-bg);
-            border-radius: 10px;
+            width: 44px;
+            height: 44px;
+            background: var(--accent);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 18px;
+            font-weight: 800;
+            font-size: 16px;
+            letter-spacing: -1px;
+            box-shadow: 0 4px 20px var(--accent-glow);
         }
 
         .logo-text {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
             letter-spacing: -0.5px;
         }
@@ -76,11 +81,23 @@
             color: var(--accent);
         }
 
+        .header-badge {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .clear-btn {
             background: transparent;
             border: 1px solid var(--border);
             color: var(--text-secondary);
-            padding: 8px 16px;
+            padding: 10px 18px;
             border-radius: 8px;
             font-family: inherit;
             font-size: 14px;
@@ -109,22 +126,35 @@
 
         .welcome {
             text-align: center;
-            padding: 60px 20px;
-            animation: fadeIn 0.5s ease;
+            padding: 80px 20px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--user-bg);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 36px;
+            box-shadow: 0 8px 32px var(--accent-glow);
         }
 
         .welcome h2 {
-            font-size: 32px;
-            font-weight: 700;
+            font-size: 36px;
+            font-weight: 800;
             margin-bottom: 12px;
-            letter-spacing: -0.5px;
+            letter-spacing: -1px;
         }
 
         .welcome p {
             color: var(--text-secondary);
             font-size: 16px;
             max-width: 500px;
-            margin: 0 auto 32px;
+            margin: 0 auto 40px;
             line-height: 1.6;
         }
 
@@ -133,15 +163,18 @@
             flex-wrap: wrap;
             gap: 10px;
             justify-content: center;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
         .suggestion {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
             border: 1px solid var(--border);
             color: var(--text-secondary);
-            padding: 10px 16px;
-            border-radius: 20px;
+            padding: 12px 20px;
+            border-radius: 24px;
             font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -151,6 +184,7 @@
             border-color: var(--accent);
             color: white;
             transform: translateY(-2px);
+            box-shadow: 0 4px 16px var(--accent-glow);
         }
 
         /* Messages */
@@ -162,7 +196,7 @@
 
         .message {
             display: flex;
-            gap: 16px;
+            gap: 14px;
             animation: slideUp 0.3s ease;
         }
 
@@ -171,32 +205,33 @@
         }
 
         .avatar {
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 700;
             flex-shrink: 0;
         }
 
         .message.user .avatar {
             background: var(--user-bg);
+            box-shadow: 0 2px 12px var(--accent-glow);
         }
 
         .message.assistant .avatar {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
             border: 1px solid var(--border);
             color: var(--accent);
         }
 
         .message-content {
-            max-width: 70%;
+            max-width: 75%;
             padding: 16px 20px;
             border-radius: 16px;
-            line-height: 1.6;
+            line-height: 1.65;
             font-size: 15px;
         }
 
@@ -206,7 +241,7 @@
         }
 
         .message.assistant .message-content {
-            background: var(--assistant-bg);
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-bottom-left-radius: 4px;
             color: var(--text-secondary);
@@ -214,20 +249,28 @@
 
         .message.assistant .message-content strong {
             color: var(--text-primary);
+            font-weight: 600;
         }
 
         .message.assistant .message-content code {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'SF Mono', 'Fira Code', monospace;
             background: var(--bg-primary);
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 4px;
             font-size: 13px;
+            border: 1px solid var(--border);
+        }
+
+        /* Stats highlight */
+        .stat-highlight {
+            color: var(--accent);
+            font-weight: 700;
         }
 
         /* Typing indicator */
         .typing {
             display: flex;
-            gap: 4px;
+            gap: 5px;
             padding: 8px 0;
         }
 
@@ -264,7 +307,7 @@
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 14px 20px;
+            padding: 16px 20px;
             color: var(--text-primary);
             font-family: inherit;
             font-size: 15px;
@@ -278,25 +321,26 @@
 
         .input-field:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(255, 77, 0, 0.1);
+            box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
         .send-btn {
             background: var(--user-bg);
             border: none;
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             border-radius: 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
+            box-shadow: 0 4px 16px var(--accent-glow);
         }
 
         .send-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(255, 77, 0, 0.3);
+            box-shadow: 0 6px 24px var(--accent-glow);
         }
 
         .send-btn:disabled {
@@ -307,15 +351,15 @@
         }
 
         .send-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             fill: white;
         }
 
         /* Animations */
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes slideUp {
@@ -352,41 +396,90 @@
             background: var(--text-muted);
         }
 
-        /* Markdown-like formatting */
-        .message-content h1, .message-content h2, .message-content h3 {
-            color: var(--text-primary);
-            margin: 16px 0 8px;
-        }
-
-        .message-content ul, .message-content ol {
-            margin: 8px 0;
-            padding-left: 20px;
-        }
-
-        .message-content li {
-            margin: 4px 0;
-        }
-
-        .message-content p {
-            margin: 8px 0;
-        }
-
+        /* Table styling */
         .message-content table {
             width: 100%;
             border-collapse: collapse;
-            margin: 12px 0;
+            margin: 16px 0;
             font-size: 14px;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         .message-content th, .message-content td {
             border: 1px solid var(--border);
-            padding: 8px 12px;
+            padding: 10px 14px;
             text-align: left;
         }
 
         .message-content th {
             background: var(--bg-primary);
             color: var(--text-primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .message-content tr:hover td {
+            background: var(--bg-tertiary);
+        }
+
+        /* Lists */
+        .message-content ul, .message-content ol {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+
+        .message-content li {
+            margin: 6px 0;
+        }
+
+        .message-content p {
+            margin: 10px 0;
+        }
+
+        .message-content p:first-child {
+            margin-top: 0;
+        }
+
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .logo-text {
+                font-size: 18px;
+            }
+            
+            .header-badge {
+                display: none;
+            }
+            
+            .chat-container {
+                padding: 16px;
+            }
+            
+            .welcome {
+                padding: 40px 16px;
+            }
+            
+            .welcome h2 {
+                font-size: 28px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .input-container {
+                padding: 16px;
+            }
         }
     </style>
 </head>
@@ -394,20 +487,25 @@
     <header class="header">
         <div class="logo">
             <div class="logo-icon">OT</div>
-            <div class="logo-text">Overtime <span>RFP Agent</span></div>
+            <div class="logo-text">Overtime <span>Sales Agent</span></div>
         </div>
-        <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="header-badge">AI Powered</div>
+            <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
+        </div>
     </header>
 
     <div class="chat-container" id="chat-container">
         <div class="welcome" id="welcome">
-            <h2>Ask me about Overtime deals</h2>
-            <p>I can search your Salesforce data, find account history, and provide deal summaries.</p>
+            <div class="welcome-icon">📊</div>
+            <h2>Overtime Sales Intelligence</h2>
+            <p>Ask me about deals, pipeline, accounts, and revenue. I have access to your Salesforce data.</p>
             <div class="suggestions">
-                <button class="suggestion" onclick="askQuestion('What deals have we done with Nike?')">Nike deals</button>
-                <button class="suggestion" onclick="askQuestion('Show me our top accounts')">Top accounts</button>
-                <button class="suggestion" onclick="askQuestion('Compare Nike and Adidas')">Compare brands</button>
-                <button class="suggestion" onclick="askQuestion('What deals did we lose last quarter?')">Lost deals</button>
+                <button class="suggestion" onclick="askQuestion('What\'s our booked 75 for Core this quarter?')">Booked 75 Core</button>
+                <button class="suggestion" onclick="askQuestion('How much has Nike booked with us this year?')">Nike revenue</button>
+                <button class="suggestion" onclick="askQuestion('Show me the pipeline breakdown for League')">League pipeline</button>
+                <button class="suggestion" onclick="askQuestion('How much media did we book this month?')">Media bookings</button>
+                <button class="suggestion" onclick="askQuestion('What\'s our OTE revenue this year?')">OTE revenue</button>
             </div>
         </div>
         <div class="messages" id="messages"></div>
@@ -419,7 +517,7 @@
                 type="text" 
                 class="input-field" 
                 id="input" 
-                placeholder="Ask about deals, accounts, or search opportunities..." 
+                placeholder="Ask about deals, accounts, pipeline, or revenue..." 
                 autocomplete="off"
             />
             <button class="send-btn" id="send-btn" onclick="send()">
@@ -453,14 +551,11 @@
             const message = input.value.trim();
             if (!message) return;
 
-            // Hide welcome screen
             welcomeDiv.style.display = 'none';
-
             addMessage(message, 'user');
             input.value = '';
             sendBtn.disabled = true;
 
-            // Add typing indicator
             const typingId = addTyping();
 
             try {
@@ -488,7 +583,7 @@
             
             const avatar = document.createElement('div');
             avatar.className = 'avatar';
-            avatar.textContent = role === 'user' ? 'You' : 'AI';
+            avatar.textContent = role === 'user' ? 'You' : 'OT';
             
             const content = document.createElement('div');
             content.className = 'message-content';
@@ -509,7 +604,7 @@
             
             const avatar = document.createElement('div');
             avatar.className = 'avatar';
-            avatar.textContent = 'AI';
+            avatar.textContent = 'OT';
             
             const content = document.createElement('div');
             content.className = 'message-content';
@@ -529,17 +624,56 @@
         }
 
         function formatMessage(text) {
-            // Convert markdown-like formatting to HTML
-            return text
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\n/g, '<br>')
-                .replace(/\|(.*)\|/g, (match) => {
-                    // Simple table detection
-                    if (match.includes('|')) {
-                        return match;
+            // Convert markdown-style tables to HTML
+            let formatted = text;
+            
+            // Handle tables
+            if (text.includes('|')) {
+                const lines = text.split('\n');
+                let inTable = false;
+                let tableHtml = '<table>';
+                let resultLines = [];
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line.startsWith('|') && line.endsWith('|')) {
+                        if (!inTable) {
+                            inTable = true;
+                        }
+                        // Skip separator lines
+                        if (line.includes('---')) continue;
+                        
+                        const cells = line.split('|').filter(c => c.trim());
+                        const isHeader = !tableHtml.includes('<tr>');
+                        const tag = isHeader ? 'th' : 'td';
+                        tableHtml += '<tr>' + cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join('') + '</tr>';
+                    } else {
+                        if (inTable) {
+                            tableHtml += '</table>';
+                            resultLines.push(tableHtml);
+                            tableHtml = '<table>';
+                            inTable = false;
+                        }
+                        resultLines.push(line);
                     }
-                    return match;
-                });
+                }
+                if (inTable) {
+                    tableHtml += '</table>';
+                    resultLines.push(tableHtml);
+                }
+                formatted = resultLines.join('\n');
+            }
+            
+            // Format currency values
+            formatted = formatted.replace(/\$[\d,]+\.?\d*/g, '<span class="stat-highlight">$&</span>');
+            
+            // Bold
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Line breaks
+            formatted = formatted.replace(/\n/g, '<br>');
+            
+            return formatted;
         }
 
         async function clearChat() {
