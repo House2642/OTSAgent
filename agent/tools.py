@@ -194,15 +194,14 @@ def get_deals(
     limit: int = 50,
 ) -> list[dict]:
     """
-    Get a comprehensive list of deals matching filters. Use when you need ALL deals 
-    for a time period, not just semantically similar ones. Returns actual deal details.
+    Get a comprehensive list of ALL deals matching filters. Use when you need every deal
+    for a time period, not just semantically similar ones. Returns unique deals with totals.
     Dates should be YYYY-MM-DD format.
     """
     sql = """
-        SELECT DISTINCT ON (opportunity_id)
+        SELECT 
             opportunity_name, account_name, stage, product_family,
-            SUM(split_schedule_amount) as total_amount,
-            MIN(schedule_date) as first_schedule_date
+            SUM(split_schedule_amount) as total_amount
         FROM opportunities
         WHERE 1=1
     """
@@ -234,13 +233,14 @@ def get_deals(
         params.append(end_date)
     
     sql += """
-        GROUP BY opportunity_id, opportunity_name, account_name, stage, product_family
+        GROUP BY opportunity_name, account_name, stage, product_family
         ORDER BY total_amount DESC
         LIMIT %s
     """
     params.append(limit)
     
     return query(sql, tuple(params))
+
 @tool
 def get_pipeline_by_stage(
     opportunity_record_type: RecordType = None,
