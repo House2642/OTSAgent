@@ -5,12 +5,17 @@ from datetime import datetime, timedelta
 from tqdm import tqdm
 
 def load_data():
-    #only pull the past year
     df = pd.read_csv("../data/salesforce_export.csv")
     df['Created Date'] = pd.to_datetime(df['Created Date'])
     one_year_ago = datetime.now() - timedelta(days=365)
     salesforce_data = df[df['Created Date'] >= one_year_ago]
     return salesforce_data
+
+def safe_val(val):
+    """Convert pandas NaN/NaT to None for PostgreSQL"""
+    if pd.isna(val):
+        return None
+    return val
 
 def embed_data():
     salesforce_data = load_data() 
@@ -21,32 +26,43 @@ def embed_data():
         
         execute("""
             INSERT INTO opportunities 
-            (opportunity_name, opportunity_record_type, opportunity_type, 
-             product_name, league_name, account_name, amount, stage, 
-             probability, loss_reason, created_date, schedule_date, 
+            (opportunity_id, opportunity_name, opportunity_record_type, opportunity_type,
+             stage, probability, product_name, product_family, league_name,
+             account_name, category, agency, agency_holding_company,
+             split_schedule_amount, split_expected_schedule_amount,
+             created_date, schedule_date, close_date,
+             loss_reason, loss_reason_context, owner_role, opportunity_owner,
              content, embedding)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
-            row['Opportunity Name'],
-            row['Opportunity Record Type'],
-            row['Opportunity Type'],
-            row['Product Name'],
-            row['League Name'],
-            row['Account Name'],
-            row['Amount'],
-            row['Stage'],
-            row['Probability (%)'],
-            row['Loss Reason'],
-            row['Created Date'],
-            row['Schedule Date'],
+            safe_val(row['Opportunity ID']),
+            safe_val(row['Opportunity Name']),
+            safe_val(row['Opportunity Record Type']),
+            safe_val(row['Opportunity Type']),
+            safe_val(row['Stage']),
+            safe_val(row['Probability (%)']),
+            safe_val(row['Product Name']),
+            safe_val(row['Product Family']),
+            safe_val(row['League Name']),
+            safe_val(row['Account Name']),
+            safe_val(row['Category']),
+            safe_val(row['Agency']),
+            safe_val(row['Agency Holding Company']),
+            safe_val(row['Split Schedule Amount']),
+            safe_val(row['Split Expected Schedule Amount']),
+            safe_val(row['Created Date']),
+            safe_val(row['Schedule Date']),
+            safe_val(row['Close Date']),
+            safe_val(row['Loss Reason']),
+            safe_val(row['Loss Reason Context']),
+            safe_val(row['Owner Role']),
+            safe_val(row['Opportunity Owner']),
             content,
             embedding
         ))
         
 if __name__ == "__main__":
-    # Clear first
     execute("DELETE FROM opportunities")
     print("✓ Table cleared")
-    
-    # Load all (remove limit)
     embed_data()
+    print("✓ Data loaded")

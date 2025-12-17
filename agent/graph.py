@@ -3,12 +3,14 @@ import operator
 from langchain_anthropic import ChatAnthropic
 from langgraph.graph import StateGraph, END, START, add_messages
 from langchain_core.messages import SystemMessage, HumanMessage
-from tools import search_opportunities, get_account_history, get_account_summary
+from tools import search_opportunities, get_account_history, get_account_summary, get_revenue, get_pipeline_by_stage, get_pipeline
 from langgraph.prebuilt import ToolNode, tools_condition
 from dotenv import load_dotenv
+from datetime import datetime
+
 load_dotenv()
 
-salesforce_tools = [search_opportunities, get_account_history, get_account_summary]
+salesforce_tools = [search_opportunities, get_account_history, get_account_summary, get_revenue, get_pipeline_by_stage, get_pipeline]
 model = ChatAnthropic(model="claude-haiku-4-5-20251001")
 salesforce_llm = model.bind_tools(salesforce_tools)
 #Nodes
@@ -17,16 +19,52 @@ class RFPState(TypedDict):
     messages: Annotated[str, add_messages]
 
 def retrieve_salesforce(state: RFPState):
-    get_data = salesforce_llm.invoke([SystemMessage(content="""
-            You are an RFP assistant for Overtime Sports. You help answer questions about past deals and accounts.
+    get_data = salesforce_llm.invoke([SystemMessage(content=f"""
+        You are an RFP assistant for Overtime Sports. You help answer questions about past deals, accounts, and pipeline.
+        Current Date is {datetime.now().strftime("%Y-%m-%d")}
+        TOOLS:
+        - search_opportunities: Find similar deals or companies semantically
+        - get_account_history: Get all deals for a specific company
+        - get_account_summary: Get summary stats for an account (revenue won, pipeline)
+        - get_revenue: Get booked revenue with filters (date range, product family, account, Core/League)
+        - get_pipeline: Get weighted/unweighted pipeline totals (can filter by min probability for "booked 75" questions)
+        - get_pipeline_by_stage: Get pipeline breakdown by stage
 
-            Use your tools to get accurate data:
-            - search_opportunities: Find similar deals or companies semantically
-            - get_account_history: Get all deals for a specific company
-            - get_account_summary: Get summary stats (revenue won, deals won/lost, pipeline)
+        KEY CONCEPTS:
+        - "Booked" means Closed Won (Core) or Long-Form Contract Signed (League)
+        - Always use schedule_date for revenue timing - revenue is recognized when scheduled, not when deal closed
+        - Core and League are separate business lines - filter by opportunity_record_type when asked about one specifically
+        - Dates should be YYYY-MM-DD format
 
-            Always use tools for data - never make up numbers.
-            """), *state["messages"]])
+        COMMON QUESTION PATTERNS:
+
+        "How much has [account] booked this year?"
+        → Use get_revenue with account and date range
+
+        "What's our booked 50/75/90 this quarter?"
+        → This means booked revenue PLUS weighted pipeline at that probability or above
+        → Call get_revenue for booked amount, then get_pipeline with min_probability for pipeline portion
+        → Also call get_pipeline_by_stage to show breakdown
+        → Provide total first, then breakdown by stage
+
+        "How much media did we book?"
+        → Use get_revenue with product_family="Media"
+
+        "How much for Overtime Elite / OTE?"
+        → Use get_revenue with product_family="OTE League Offering"
+        → League product families:
+        - OTE = "OTE League Offering"
+        - OT7 = "OT7 League Offering"  
+        - OT Select = "OTS League Offering"
+        - OTX = "OTX League Offering"
+        - OT Nationals = "OT Nationals League Offering"
+        → Don't use league_name field - use product_family instead (handles multi-league deals)
+
+        "What's our pipeline for Core/League?"
+        → Use get_pipeline or get_pipeline_by_stage with opportunity_record_type
+
+        Always use tools for data - never make up numbers.
+        """), *state["messages"]])
     
     return {"messages": [get_data]}
 
@@ -56,7 +94,7 @@ if __name__ == "__main__":
             break
         
         messages.append(HumanMessage(content=user_input))
-        result = app.invoke({"messages": messages})
+        result = sf_app.invoke({"messages": messages})
         
         # Update messages with full conversation
         messages = result["messages"]

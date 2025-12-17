@@ -42,6 +42,7 @@ def init_db():
 
             created_date DATE, 
             schedule_date DATE,
+            close_date DATE,
             split_schedule_amount DECIMAL, 
             split_expected_schedule_amount DECIMAL, 
             loss_reason TEXT,
