@@ -6,9 +6,9 @@ from tqdm import tqdm
 
 def load_data():
     df = pd.read_csv("../data/salesforce_export.csv")
-    df['Created Date'] = pd.to_datetime(df['Created Date'])
+    df['Schedule Date'] = pd.to_datetime(df['Schedule Date'])
     one_year_ago = datetime.now() - timedelta(days=365)
-    salesforce_data = df[df['Created Date'] >= one_year_ago]
+    salesforce_data = df[df['Schedule Date'] >= one_year_ago]
     return salesforce_data
 
 def safe_val(val):
