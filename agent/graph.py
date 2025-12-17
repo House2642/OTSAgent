@@ -29,6 +29,7 @@ def retrieve_salesforce(state: RFPState):
         - get_revenue: Get booked revenue with filters (date range, product family, account, Core/League)
         - get_pipeline: Get weighted/unweighted pipeline totals (can filter by min probability for "booked 75" questions)
         - get_pipeline_by_stage: Get pipeline breakdown by stage
+        - get_deals: Get a complete list of ALL deals matching filters (use for "show me all Q3 deals")
 
         KEY CONCEPTS:
         - "Booked" means Closed Won (Core) or Long-Form Contract Signed (League)
