@@ -184,6 +184,64 @@ def get_pipeline(
     return query(sql, tuple(params))[0]
 
 @tool
+def get_deals(
+    opportunity_record_type: RecordType = None,
+    stage: StageType = None,
+    product_family: str = None,
+    account: str = None,
+    start_date: str = None,
+    end_date: str = None,
+    limit: int = 50,
+) -> list[dict]:
+    """
+    Get a comprehensive list of deals matching filters. Use when you need ALL deals 
+    for a time period, not just semantically similar ones. Returns actual deal details.
+    Dates should be YYYY-MM-DD format.
+    """
+    sql = """
+        SELECT DISTINCT ON (opportunity_id)
+            opportunity_name, account_name, stage, product_family,
+            SUM(split_schedule_amount) as total_amount,
+            MIN(schedule_date) as first_schedule_date
+        FROM opportunities
+        WHERE 1=1
+    """
+    params = []
+    
+    if opportunity_record_type:
+        sql += " AND opportunity_record_type = %s"
+        params.append(opportunity_record_type)
+    
+    if stage:
+        sql += " AND stage = %s"
+        params.append(stage)
+    
+    if product_family:
+        sql += " AND product_family ILIKE %s"
+        params.append(f"%{product_family}%")
+    
+    if account:
+        sql += " AND (account_name ILIKE %s OR opportunity_name ILIKE %s)"
+        params.append(f"%{account}%")
+        params.append(f"%{account}%")
+    
+    if start_date:
+        sql += " AND schedule_date >= %s"
+        params.append(start_date)
+    
+    if end_date:
+        sql += " AND schedule_date <= %s"
+        params.append(end_date)
+    
+    sql += """
+        GROUP BY opportunity_id, opportunity_name, account_name, stage, product_family
+        ORDER BY total_amount DESC
+        LIMIT %s
+    """
+    params.append(limit)
+    
+    return query(sql, tuple(params))
+@tool
 def get_pipeline_by_stage(
     opportunity_record_type: RecordType = None,
     account: str = None,

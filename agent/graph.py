@@ -3,14 +3,14 @@ import operator
 from langchain_anthropic import ChatAnthropic
 from langgraph.graph import StateGraph, END, START, add_messages
 from langchain_core.messages import SystemMessage, HumanMessage
-from tools import search_opportunities, get_account_history, get_account_summary, get_revenue, get_pipeline_by_stage, get_pipeline
+from tools import search_opportunities, get_account_history, get_account_summary, get_revenue, get_pipeline_by_stage, get_pipeline, get_deals
 from langgraph.prebuilt import ToolNode, tools_condition
 from dotenv import load_dotenv
 from datetime import datetime
 
 load_dotenv()
 
-salesforce_tools = [search_opportunities, get_account_history, get_account_summary, get_revenue, get_pipeline_by_stage, get_pipeline]
+salesforce_tools = [search_opportunities, get_account_history, get_account_summary, get_revenue, get_pipeline_by_stage, get_pipeline, get_deals]
 model = ChatAnthropic(model="claude-haiku-4-5-20251001")
 salesforce_llm = model.bind_tools(salesforce_tools)
 #Nodes
