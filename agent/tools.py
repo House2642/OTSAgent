@@ -286,6 +286,18 @@ def get_pipeline_by_stage(
     
     return query(sql, tuple(params))
 
+@tool
+def search_audience_data(search_query: str, limit: int = 2) -> list[dict]:
+    """Search audience research docs for demographics, behaviors, preferences."""
+    embedding = embed(search_query)
+    sql = """
+        SELECT source, content, embedding <=> %s::vector AS distance
+        FROM audience_statistics
+        ORDER BY distance
+        LIMIT %s
+    """
+    return query(sql, (embedding, limit))
+
 if __name__ == "__main__":
     #results = search_opportunities("Nike", opportunity_record_type="Core")
     results = get_account_summary.invoke({"account": "NIKE"})

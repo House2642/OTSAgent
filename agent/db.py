@@ -15,6 +15,7 @@ def init_db():
     conn = get_conn()
     cur = conn.cursor()
     
+    cur.execute("DROP TABLE IF EXISTS audience_statistics")
     #cur.execute("DROP TABLE IF EXISTS opportunities")
     cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
     
@@ -60,6 +61,16 @@ def init_db():
     cur.execute("CREATE INDEX IF NOT EXISTS idx_product_family ON opportunities(product_family)")
     cur.execute("CREATE INDEX IF NOT EXISTS idx_probability ON opportunities(probability)")
     
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS audience_statistics (
+        id SERIAL PRIMARY KEY,
+        source TEXT,
+        section_id INTEGER,
+        content TEXT,
+        embedding vector(1536)
+    )
+    """)
+
     conn.commit()
     conn.close()
     print("✓ Database initialized")
