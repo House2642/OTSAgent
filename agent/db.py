@@ -15,7 +15,7 @@ def init_db():
     conn = get_conn()
     cur = conn.cursor()
     
-    cur.execute("DROP TABLE IF EXISTS opportunities")
+    #cur.execute("DROP TABLE IF EXISTS opportunities")
     cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
     
     #opportunities table
