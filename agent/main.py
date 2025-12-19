@@ -76,19 +76,14 @@ async def upload_pdf(file: UploadFile = File(...)):
 @app.post("/rfp/generate")
 def generate_rfp(request: RFPRequest):
     """Generate RFP response using the RFP graph"""
-    # Combine PDF context with user message
-    full_message = f"RFP Document:\n{request.pdf_text}\n\nRequest: {request.message}"
+    try:
+        # The RFP graph expects {"raw_rfp": text} and generates a full proposal
+        result = rfp_app.invoke({"raw_rfp": request.pdf_text})
 
-    rfp_conversation_history.append(HumanMessage(content=full_message))
-
-    result = rfp_app.invoke({"messages": rfp_conversation_history})
-
-    # Update history
-    rfp_conversation_history.clear()
-    rfp_conversation_history.extend(result["messages"])
-
-    answer = result["messages"][-1].content
-    return ChatResponse(response=answer)
+        # Return the final proposal
+        return ChatResponse(response=result["final_proposal"])
+    except Exception as e:
+        return ChatResponse(response=f"Error generating RFP response: {str(e)}")
 
 @app.post("/rfp/clear")
 def clear_rfp():

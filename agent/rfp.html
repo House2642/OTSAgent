@@ -409,6 +409,32 @@
             fill: white;
         }
 
+        .generate-btn {
+            background: var(--user-bg);
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px var(--accent-glow);
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px var(--accent-glow);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -471,6 +497,10 @@
             <input type="file" id="file-input" class="file-input" accept=".pdf" />
 
             <div id="file-display"></div>
+
+            <button class="generate-btn" id="generate-btn" onclick="generateProposal()" disabled>
+                📄 Generate Full Proposal
+            </button>
         </div>
 
         <div class="chat-container">
@@ -512,6 +542,7 @@
         const messagesDiv = document.getElementById('messages');
         const input = document.getElementById('input');
         const sendBtn = document.getElementById('send-btn');
+        const generateBtn = document.getElementById('generate-btn');
 
         // Upload area click
         uploadArea.addEventListener('click', () => fileInput.click());
@@ -578,12 +609,13 @@
                     </div>
                 `;
 
-                // Enable input
+                // Enable input and generate button
                 input.disabled = false;
-                input.placeholder = "Ask me to generate a response for this RFP...";
+                input.placeholder = "Click 'Generate Proposal' or ask questions...";
                 sendBtn.disabled = false;
+                generateBtn.disabled = false;
 
-                addMessage('PDF uploaded successfully! Ask me to generate a response or answer specific questions about the RFP.', 'assistant');
+                addMessage('PDF uploaded successfully! Click "Generate Full Proposal" to create a complete RFP response.', 'assistant');
             } catch (e) {
                 alert('Error uploading file: ' + e.message);
             }
@@ -596,6 +628,7 @@
             input.disabled = true;
             input.placeholder = "Upload a PDF to start asking questions...";
             sendBtn.disabled = true;
+            generateBtn.disabled = true;
             fileInput.value = '';
         }
 
@@ -606,9 +639,48 @@
             }
         });
 
+        async function generateProposal() {
+            if (!uploadedPdfText) return;
+
+            addMessage('Generate a full RFP proposal for this document', 'user');
+            input.disabled = true;
+            sendBtn.disabled = true;
+
+            const typingId = addTyping();
+
+            try {
+                const res = await fetch('/rfp/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pdf_text: uploadedPdfText,
+                        message: 'generate proposal'
+                    })
+                });
+                const data = await res.json();
+
+                removeTyping(typingId);
+                addMessage(data.response, 'assistant');
+            } catch (e) {
+                removeTyping(typingId);
+                addMessage('Sorry, something went wrong generating the proposal. Please try again.', 'assistant');
+            }
+
+            sendBtn.disabled = false;
+            input.disabled = false;
+            input.focus();
+        }
+
         async function send() {
             const message = input.value.trim();
             if (!message || !uploadedPdfText) return;
+
+            // Check if user wants to generate proposal
+            if (message.toLowerCase().includes('generate') || message.toLowerCase().includes('proposal')) {
+                input.value = '';
+                generateProposal();
+                return;
+            }
 
             addMessage(message, 'user');
             input.value = '';
