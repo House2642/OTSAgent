@@ -155,10 +155,10 @@ def load_unstructured_json(json_path: str):
     return loaded
 
 if __name__ == "__main__":
-    #execute("DELETE FROM opportunities")
-    #print("✓ Table cleared")
-    #embed_data()
-    #print("✓ Data loaded")
+    execute("DELETE FROM opportunities")
+    print("✓ Table cleared")
+    embed_data()
+    print("✓ Data loaded")
     execute("DELETE FROM audience_statistics")
     for filename in os.listdir("../data/docs/unstructured_docs/"):
         load_unstructured_json(f"../data/docs/unstructured_docs/{filename}")
