@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFP Generator - Overtime Sales Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --bg-tertiary: #141414;
+            --bg-card: #1a1a1a;
+            --accent: #FF4D00;
+            --accent-hover: #FF6A2A;
+            --accent-glow: rgba(255, 77, 0, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --border: #2a2a2a;
+            --success: #00C853;
+            --user-bg: linear-gradient(135deg, #FF4D00 0%, #FF6A2A 100%);
+            --assistant-bg: #1a1a1a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--accent);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+            letter-spacing: -1px;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            color: var(--accent);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-btn, .clear-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover, .clear-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--text-muted);
+        }
+
+        .container {
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 24px;
+        }
+
+        .sidebar {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            height: fit-content;
+            position: sticky;
+            top: 90px;
+        }
+
+        .sidebar h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-area.dragover {
+            border-color: var(--accent);
+            background: rgba(255, 77, 0, 0.05);
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .upload-area p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .upload-area .file-types {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .uploaded-file {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .file-icon {
+            font-size: 24px;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .file-status {
+            font-size: 12px;
+            color: var(--success);
+        }
+
+        .remove-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .remove-btn:hover {
+            color: var(--accent);
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            min-height: 600px;
+            max-height: calc(100vh - 280px);
+        }
+
+        .welcome {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--user-bg);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 36px;
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+
+        .welcome h3 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        .welcome p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .message {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 24px;
+            animation: slideUp 0.3s ease;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .message.user .avatar {
+            background: var(--user-bg);
+            box-shadow: 0 2px 12px var(--accent-glow);
+        }
+
+        .message.assistant .avatar {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--accent);
+        }
+
+        .message-content {
+            max-width: 75%;
+            padding: 16px 20px;
+            border-radius: 16px;
+            line-height: 1.65;
+            font-size: 15px;
+        }
+
+        .message.user .message-content {
+            background: var(--user-bg);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-content {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+            color: var(--text-secondary);
+        }
+
+        .typing {
+            display: flex;
+            gap: 5px;
+            padding: 8px 0;
+        }
+
+        .typing span {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .typing span:nth-child(1) { animation-delay: -0.32s; }
+        .typing span:nth-child(2) { animation-delay: -0.16s; }
+
+        .input-area {
+            border-top: 1px solid var(--border);
+            padding: 20px 24px;
+            background: var(--bg-secondary);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .input-field {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-field::placeholder {
+            color: var(--text-muted);
+        }
+
+        .input-field:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .input-field:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .send-btn {
+            background: var(--user-bg);
+            border: none;
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 6px 24px var(--accent-glow);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .send-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: white;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">OT</div>
+            <div class="logo-text">RFP <span>Generator</span></div>
+        </div>
+        <div class="header-actions">
+            <a href="/" class="back-btn">← Back to Home</a>
+            <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="sidebar">
+            <h2>Upload RFP Document</h2>
+            <div class="upload-area" id="upload-area">
+                <div class="upload-icon">📄</div>
+                <p>Drag & drop your PDF here</p>
+                <p>or click to browse</p>
+                <p class="file-types">Supports PDF files</p>
+            </div>
+            <input type="file" id="file-input" class="file-input" accept=".pdf" />
+
+            <div id="file-display"></div>
+        </div>
+
+        <div class="chat-container">
+            <div class="messages" id="messages">
+                <div class="welcome">
+                    <div class="welcome-icon">📄</div>
+                    <h3>RFP Response Generator</h3>
+                    <p>Upload an RFP document to get started. I'll help you generate professional responses based on your Salesforce data and company information.</p>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <input
+                        type="text"
+                        class="input-field"
+                        id="input"
+                        placeholder="Upload a PDF to start asking questions..."
+                        autocomplete="off"
+                        disabled
+                    />
+                    <button class="send-btn" id="send-btn" onclick="send()" disabled>
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedPdfText = '';
+        let uploadedFileName = '';
+
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const fileDisplay = document.getElementById('file-display');
+        const messagesDiv = document.getElementById('messages');
+        const input = document.getElementById('input');
+        const sendBtn = document.getElementById('send-btn');
+
+        // Upload area click
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        async function handleFile(file) {
+            if (!file.name.endsWith('.pdf')) {
+                alert('Please upload a PDF file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/rfp/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.error) {
+                    alert('Error uploading file: ' + data.error);
+                    return;
+                }
+
+                uploadedPdfText = data.text;
+                uploadedFileName = data.filename;
+
+                // Show uploaded file
+                fileDisplay.innerHTML = `
+                    <div class="uploaded-file">
+                        <div class="file-icon">📄</div>
+                        <div class="file-info">
+                            <div class="file-name">${data.filename}</div>
+                            <div class="file-status">✓ Uploaded successfully</div>
+                        </div>
+                        <button class="remove-btn" onclick="removeFile()">✕</button>
+                    </div>
+                `;
+
+                // Enable input
+                input.disabled = false;
+                input.placeholder = "Ask me to generate a response for this RFP...";
+                sendBtn.disabled = false;
+
+                addMessage('PDF uploaded successfully! Ask me to generate a response or answer specific questions about the RFP.', 'assistant');
+            } catch (e) {
+                alert('Error uploading file: ' + e.message);
+            }
+        }
+
+        function removeFile() {
+            uploadedPdfText = '';
+            uploadedFileName = '';
+            fileDisplay.innerHTML = '';
+            input.disabled = true;
+            input.placeholder = "Upload a PDF to start asking questions...";
+            sendBtn.disabled = true;
+            fileInput.value = '';
+        }
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey && !input.disabled) {
+                e.preventDefault();
+                send();
+            }
+        });
+
+        async function send() {
+            const message = input.value.trim();
+            if (!message || !uploadedPdfText) return;
+
+            addMessage(message, 'user');
+            input.value = '';
+            sendBtn.disabled = true;
+            input.disabled = true;
+
+            const typingId = addTyping();
+
+            try {
+                const res = await fetch('/rfp/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pdf_text: uploadedPdfText,
+                        message: message
+                    })
+                });
+                const data = await res.json();
+
+                removeTyping(typingId);
+                addMessage(data.response, 'assistant');
+            } catch (e) {
+                removeTyping(typingId);
+                addMessage('Sorry, something went wrong. Please try again.', 'assistant');
+            }
+
+            sendBtn.disabled = false;
+            input.disabled = false;
+            input.focus();
+        }
+
+        function addMessage(text, role) {
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = role === 'user' ? 'You' : 'OT';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.innerHTML = formatMessage(text);
+
+            div.appendChild(avatar);
+            div.appendChild(content);
+            messagesDiv.appendChild(div);
+
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function addTyping() {
+            const id = 'typing-' + Date.now();
+            const div = document.createElement('div');
+            div.className = 'message assistant';
+            div.id = id;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = 'OT';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+
+            div.appendChild(avatar);
+            div.appendChild(content);
+            messagesDiv.appendChild(div);
+
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            return id;
+        }
+
+        function removeTyping(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function formatMessage(text) {
+            let formatted = text.replace(/\n/g, '<br>');
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            return formatted;
+        }
+
+        async function clearChat() {
+            await fetch('/rfp/clear', { method: 'POST' });
+            messagesDiv.innerHTML = `
+                <div class="welcome">
+                    <div class="welcome-icon">📄</div>
+                    <h3>RFP Response Generator</h3>
+                    <p>Upload an RFP document to get started. I'll help you generate professional responses based on your Salesforce data and company information.</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
