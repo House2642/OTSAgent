@@ -142,6 +142,13 @@ def get_audience_statistics(state: RFPState) -> dict:
             - Do NOT include generic "OT fans are sports fans" stats
             - Do NOT include stats unrelated to {state['client']}'s category
             - Every stat needs a number (INDEX, %, or reach)
+
+            Example output for Foot Locker (sneaker retailer):
+
+            1. "488 INDEX on A18-24 (45% of the OT audience)" - Target demographic reach
+            2. "557 INDEX - More likely to shop for shoes via social media and look for inspiration from influencers and athletes" - Shopping behavior
+            3. "3 in 5 OT fans are more interested in / more likely to purchase from an apparel or shoe brand after seeing it advertise with Overtime" - Purchase intent
+            4. "160 INDEX consider themselves sneakerheads" - Category affinity
             """),
                 HumanMessage(content=f"Target audience:\n{state['target_audience']}\n\nCampaign objectives:\n{state.get('objectives', '')}")
             ]
@@ -153,9 +160,9 @@ def get_audience_statistics(state: RFPState) -> dict:
     # 2) Execute any tool calls and add ToolMessage(s)
     tool_messages = []
     for tc in (getattr(first, "tool_calls", None) or []):
-        print(tc)
+        #print(tc)
         tool_result = search_audience_data.invoke(tc["args"])
-        print(tool_result)
+        #print(tool_result)
         tool_messages.append(
             ToolMessage(
                 tool_call_id=tc["id"],
@@ -203,18 +210,108 @@ def recommend_products(state: RFPState) -> dict:
         
     return result
 
+def final_proposal(state: RFPState) -> dict:
+    result = llm.invoke([
+        SystemMessage(content="""
+        Act as a lead RFP response writer for Overtime Sports. Draft the complete text for the following slides:
+        
+        1. THE OVERTIME AUDIENCE
+           Display the 6 facts about the Overtime audience tailored to this client.
+           Format each stat with a bold headline and supporting context.
+           
+           Example format for Foot Locker:
+           STAT 1: TARGET DEMO
+           - 488 INDEX on A18-24 (45% of the OT audience)
+           
+           STAT 2: INSPIRED ONLINE
+           - 557 INDEX - More likely to shop for shoes via social media and look for inspiration from influencers and athletes
+           
+           STAT 3: SNEAKER FANATICS
+           - 3 in 5 OT fans are more interested in / more likely to purchase from an apparel or shoe brand after seeing it advertise with Overtime
+        
+        2. PARTNERSHIP OVERVIEW
+           Write a compelling 2-3 paragraph overview in this style:
+           - Open with Overtime's scale (followers, reach)
+           - Connect our audience to the client's target demo
+           - Explain WHY we're the ideal partner for this specific campaign
+           - End with the vision of what success looks like
+           
+           Example tone: "With over 110MM fans and followers, Overtime is where sports and culture collide..."
+        
+        3. CONTENT IDEAS
+           Present the top 3-4 content ideas with:
+           - Creative concept name
+           - Brief description (2-3 sentences)
+           - Which Overtime product/format it uses
+        
+        4. MEDIA & BUDGET OVERVIEW
+           Provide a summary table showing:
+           - Content idea / product
+           - Estimated budget allocation
+           - Expected deliverables/impressions
+           Total should align with client's budget range.
+        
+        5. APPENDIX
+           List:
+           - Assumptions made in this proposal
+           - Areas requiring client clarification
+           - Notes from RFP extraction
+        """),
+        HumanMessage(content=f"""
+        CLIENT: {state['client']}
+        CAMPAIGN: {state['campaign']}
+        BACKGROUND: {state['background']}
+        
+        BUDGET: {state['budget_min']} - {state['budget_max']}
+        TIMING: {state['timing']}
+        
+        OBJECTIVES:
+        {chr(10).join(f'- {obj}' for obj in state.get('objectives', []))}
+        
+        TARGET AUDIENCE: {state['target_audience']}
+        
+        KPIs:
+        {chr(10).join(f'- {kpi}' for kpi in state.get('kpis', []))}
+        
+        DELIVERABLES REQUESTED:
+        {chr(10).join(f'- {d}' for d in state.get('deliverables', []))}
+        
+        === AUDIENCE STATISTICS ===
+        {chr(10).join(f'{i+1}. {stat}' for i, stat in enumerate(state.get('audience_stats', [])))}
+        
+        === CLIENT HISTORY ===
+        {state.get('client_history', 'No prior history')}
+        
+        === RECOMMENDED PRODUCTS ===
+        {chr(10).join(f'- {p}' for p in state.get('products', []))}
+        
+        === CONTENT IDEAS ===
+        {chr(10).join(f'- {idea}' for idea in state.get('content_ideas', []))}
+        
+        === IDEA TO PRODUCT MAPPING ===
+        {state.get('ideas_to_products', {})}
+        
+        === EXTRACTION NOTES ===
+        {state.get('other_important_notes', '')}
+        """)
+    ])
+    
+    return {"final_proposal": result.content}
+
 # Build graph
 rfp_graph = StateGraph(RFPState)
 rfp_graph.add_node("extract", extract_rfp_info)
 rfp_graph.add_node("pastContext", gather_sales_context)
 rfp_graph.add_node("recommend", recommend_products)
 rfp_graph.add_node("audienceStats", get_audience_statistics)
+rfp_graph.add_node("final_output", final_proposal)
 
 rfp_graph.add_edge(START, "extract")
 rfp_graph.add_edge("extract", "pastContext")
 rfp_graph.add_edge("pastContext","audienceStats")
 rfp_graph.add_edge("audienceStats","recommend") 
-rfp_graph.add_edge("recommend", END) 
+rfp_graph.add_edge("recommend", "final_output")
+rfp_graph.add_edge("final_output", END) 
 
 rfp_app = rfp_graph.compile()
 
@@ -222,6 +319,4 @@ if __name__ == "__main__":
     test_rfp = open("../data/docs/rfp.md").read()
     result = rfp_app.invoke({"raw_rfp": test_rfp})
     
-    for key, value in result.items():
-        if key != "raw_rfp":
-            print(f"{key}: {value}")
+    print(result["final_proposal"])
