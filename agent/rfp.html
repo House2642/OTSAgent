@@ -59,15 +59,15 @@
         .logo-icon {
             width: 44px;
             height: 44px;
-            background: var(--accent);
-            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 800;
-            font-size: 16px;
-            letter-spacing: -1px;
-            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .logo-text {
@@ -340,6 +340,52 @@
         .typing span:nth-child(1) { animation-delay: -0.32s; }
         .typing span:nth-child(2) { animation-delay: -0.16s; }
 
+        .progress-container {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .progress-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-hover) 100%);
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .input-area {
             border-top: 1px solid var(--border);
             padding: 20px 24px;
@@ -476,7 +522,9 @@
 <body>
     <header class="header">
         <div class="logo">
-            <div class="logo-icon">OT</div>
+            <div class="logo-icon">
+                <img src="/static/overtime-logo.svg" alt="Overtime Sports">
+            </div>
             <div class="logo-text">RFP <span>Generator</span></div>
         </div>
         <div class="header-actions">
@@ -639,17 +687,62 @@
             }
         });
 
+        function addProgressIndicator(initialText) {
+            const id = 'progress-' + Date.now();
+            const div = document.createElement('div');
+            div.className = 'message assistant';
+            div.id = id;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = 'OT';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.innerHTML = `
+                <div class="progress-container">
+                    <div class="progress-text">
+                        <div class="progress-spinner"></div>
+                        <span id="${id}-text">${initialText}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="${id}-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            `;
+
+            div.appendChild(avatar);
+            div.appendChild(content);
+            messagesDiv.appendChild(div);
+
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            return id;
+        }
+
+        function updateProgress(id, text, progress) {
+            const textEl = document.getElementById(id + '-text');
+            const fillEl = document.getElementById(id + '-fill');
+            if (textEl) textEl.textContent = text;
+            if (fillEl) fillEl.style.width = progress + '%';
+        }
+
+        function removeProgress(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
         async function generateProposal() {
             if (!uploadedPdfText) return;
 
             addMessage('Generate a full RFP proposal for this document', 'user');
             input.disabled = true;
             sendBtn.disabled = true;
+            generateBtn.disabled = true;
 
-            const typingId = addTyping();
+            const progressId = addProgressIndicator('Starting RFP analysis...');
 
             try {
-                const res = await fetch('/rfp/generate', {
+                const response = await fetch('/rfp/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -657,17 +750,46 @@
                         message: 'generate proposal'
                     })
                 });
-                const data = await res.json();
 
-                removeTyping(typingId);
-                addMessage(data.response, 'assistant');
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const data = JSON.parse(line.slice(6));
+
+                            if (data.error) {
+                                removeProgress(progressId);
+                                addMessage('Sorry, something went wrong: ' + data.error, 'assistant');
+                                break;
+                            }
+
+                            if (data.response) {
+                                // Final response received
+                                removeProgress(progressId);
+                                addMessage(data.response, 'assistant');
+                            } else if (data.stage) {
+                                // Update progress
+                                updateProgress(progressId, data.stage, data.progress || 0);
+                            }
+                        }
+                    }
+                }
             } catch (e) {
-                removeTyping(typingId);
+                removeProgress(progressId);
                 addMessage('Sorry, something went wrong generating the proposal. Please try again.', 'assistant');
             }
 
             sendBtn.disabled = false;
             input.disabled = false;
+            generateBtn.disabled = false;
             input.focus();
         }
 
