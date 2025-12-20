@@ -57,3 +57,4 @@ PyPDF2==3.0.1
 uvicorn
 python-multipart
 python-docx
+aiofiles

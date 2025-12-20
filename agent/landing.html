@@ -53,15 +53,15 @@
         .logo-icon {
             width: 44px;
             height: 44px;
-            background: var(--accent);
-            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 800;
-            font-size: 16px;
-            letter-spacing: -1px;
-            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .logo-text {
@@ -258,7 +258,9 @@
 <body>
     <header class="header">
         <div class="logo">
-            <div class="logo-icon">OT</div>
+            <div class="logo-icon">
+                <img src="/static/overtime-logo.svg" alt="Overtime Sports">
+            </div>
             <div class="logo-text">Overtime <span>Sales Agent</span></div>
         </div>
     </header>
