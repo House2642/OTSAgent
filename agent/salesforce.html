@@ -81,6 +81,12 @@
             color: var(--accent);
         }
 
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .header-badge {
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
@@ -93,7 +99,7 @@
             letter-spacing: 0.5px;
         }
 
-        .clear-btn {
+        .back-btn, .clear-btn {
             background: transparent;
             border: 1px solid var(--border);
             color: var(--text-secondary);
@@ -104,9 +110,11 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        .clear-btn:hover {
+        .back-btn:hover, .clear-btn:hover {
             background: var(--bg-tertiary);
             color: var(--text-primary);
             border-color: var(--text-muted);
@@ -491,8 +499,9 @@
             </div>
             <div class="logo-text">Overtime <span>Sales Agent</span></div>
         </div>
-        <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="header-actions">
             <div class="header-badge">AI Powered</div>
+            <a href="/" class="back-btn">← Back to Home</a>
             <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
         </div>
     </header>
