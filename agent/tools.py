@@ -298,7 +298,36 @@ def search_audience_data(search_query: str, limit: int = 2) -> list[dict]:
     """
     return query(sql, (embedding, limit))
 
+@tool 
+def get_relevant_posts(content_idea: str, related_info: str):
+    """Search for relevant ranked posts. content_idea is a short
+    idea for the content, related_info can be campaign name, brand, or industry."""
+    
+    embedding = embed(f"{content_idea}, {related_info}")
+    
+    sql = """
+        WITH similar_posts AS (
+            SELECT p.profile, p.network, p.video_views, p.link,
+                   (p.video_views / a.avg_views) AS outlier_score,
+                   p.emmbedding <=> %s::vector AS distance
+            FROM post_stats AS p
+            JOIN (
+                SELECT profile, network, AVG(video_views) AS avg_views
+                FROM post_stats
+                GROUP BY profile, network
+            ) AS a ON p.network = a.network AND p.profile = a.profile
+            ORDER BY distance
+            LIMIT 50
+        )
+        SELECT * FROM similar_posts
+        ORDER BY outlier_score DESC
+        LIMIT 10
+    """
+    
+    return query(sql, (embedding,))
+
 if __name__ == "__main__":
     #results = search_opportunities("Nike", opportunity_record_type="Core")
-    results = get_account_summary.invoke({"account": "NIKE"})
+    #results = get_account_summary.invoke({"account": "NIKE"})
+    results = get_relevant_posts.invoke({"content_idea": "ranking nfl draft picks", "related_info": "Parternship with the NFL for the draft"})
     print(results)

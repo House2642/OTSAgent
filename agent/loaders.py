@@ -154,12 +154,44 @@ def load_unstructured_json(json_path: str):
     print(f"✓ {filename}: {loaded} tables loaded")
     return loaded
 
+def load_sprout_data(file_path: str):
+    df = pd.read_csv(file_path, thousands=",")
+
+    for index, row in tqdm(df.iterrows(), total=len(df)):
+        context = f"Caption: {row['Post']}, Tags: {row['Tags']}"
+        embedding = embed(context)
+        execute("""
+            INSERT INTO post_stats(post_date, sprout_id,
+            network, post_type, content_type, profile, link, 
+            caption, video_views, engagements, tags, 
+            emmbedding)
+            VALUES(%s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s,%s)
+        """,
+        (
+            safe_val(row['Date']),
+            safe_val(row['Post ID']),
+            safe_val(row['Network']), 
+            safe_val(row['Post Type']), 
+            safe_val(row['Content Type']), 
+            safe_val(row['Profile']),
+            safe_val(row['Link']),
+            safe_val(row['Post']),
+            safe_val(row['Video Views']), 
+            safe_val(row['Engagements']),
+            safe_val(row['Tags']),
+            embedding
+        ))
+
 if __name__ == "__main__":
-    execute("DELETE FROM opportunities")
-    print("✓ Table cleared")
-    embed_data()
-    print("✓ Data loaded")
-    execute("DELETE FROM audience_statistics")
-    for filename in os.listdir("../data/docs/unstructured_docs/"):
-        load_unstructured_json(f"../data/docs/unstructured_docs/{filename}")
-    print(query("SELECT source FROM audience_statistics"))
+    #execute("DELETE FROM opportunities")
+    #print("✓ Table cleared")
+    #embed_data()
+    #print("✓ Data loaded")
+    #execute("DELETE FROM audience_statistics")
+    #for filename in os.listdir("../data/docs/unstructured_docs/"):
+        #load_unstructured_json(f"../data/docs/unstructured_docs/{filename}")
+    #print(query("SELECT source FROM audience_statistics"))
+    #execute("DELETE FROM post_stats")
+    #load_sprout_data("../data/docs/social_stats/social_stats.csv")
+    #print(query("SELECT source FROM audience_statistics LIMIT 10"))
+    print(query("SELECT network, profile, avg(video_views) FROM post_stats GROUP BY network, profile"))

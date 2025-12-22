@@ -15,8 +15,9 @@ def init_db():
     conn = get_conn()
     cur = conn.cursor()
     
-    cur.execute("DROP TABLE IF EXISTS audience_statistics")
+    #cur.execute("DROP TABLE IF EXISTS audience_statistics")
     #cur.execute("DROP TABLE IF EXISTS opportunities")
+    cur.execute("DROP TABLE IF EXISTS post_stats")
     cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
     
     #opportunities table
@@ -69,6 +70,24 @@ def init_db():
         content TEXT,
         embedding vector(1536)
     )
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS post_stats(
+        id SERIAL PRIMARY KEY,
+        post_date DATE,
+        sprout_id VARCHAR(256) UNIQUE,
+        network TEXT,
+        post_type TEXT,
+        content_type TEXT,
+        profile TEXT,
+        link TEXT, 
+        caption TEXT,
+        video_views INTEGER,
+        engagements INTEGER, 
+        tags TEXT, 
+        emmbedding vector(1536)
+        )
     """)
 
     conn.commit()
