@@ -298,6 +298,13 @@
                 <p>Upload RFP documents and generate professional responses powered by AI</p>
                 <div class="card-badge">Document AI</div>
             </a>
+
+            <a href="/brand-insights" class="card">
+                <div class="card-icon">📈</div>
+                <h2>Brand Fam Agent</h2>
+                <p>Explore audience demographics, fan insights, and engagement metrics across all Overtime channels</p>
+                <div class="card-badge">Audience Analytics</div>
+            </a>
         </div>
     </div>
 
@@ -311,6 +318,8 @@
                 // Simple routing based on keywords
                 if (query.includes('rfp') || query.includes('document') || query.includes('pdf')) {
                     window.location.href = '/rfp';
+                } else if (query.includes('brand') || query.includes('demographic') || query.includes('audience') || query.includes('fan') || query.includes('insight') || query.includes('lda')) {
+                    window.location.href = '/brand-insights';
                 } else if (query.includes('salesforce') || query.includes('deal') || query.includes('pipeline') || query.includes('account')) {
                     window.location.href = '/salesforce';
                 } else if (query) {

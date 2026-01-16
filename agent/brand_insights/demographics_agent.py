@@ -10,7 +10,7 @@ load_dotenv()
 
 llm = ChatAnthropic(model="claude-haiku-4-5-20251001")  # Fixed: model= keyword
 
-from demographics_tools import account_search, fan_overlap, sports_fandom, audience_demographics
+from .demographics_tools import account_search, fan_overlap, sports_fandom, audience_demographics
 
 DEBUG = True
 tools = [account_search, fan_overlap, sports_fandom, audience_demographics]

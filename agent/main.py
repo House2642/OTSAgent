@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from graph import sf_app
 from rfp_graph import rfp_app
+from brand_insights.brand_insights_agents import brand_insights_agent
 from langchain_core.messages import HumanMessage
 import PyPDF2
 import io
@@ -17,6 +18,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 conversation_history = []
 rfp_conversation_history = []
+brand_insights_conversation_history = []
 
 class ChatRequest(BaseModel):
     message: str
@@ -122,4 +124,28 @@ async def generate_rfp(request: RFPRequest):
 @app.post("/rfp/clear")
 def clear_rfp():
     rfp_conversation_history.clear()
+    return {"status": "cleared"}
+
+# Brand Fam Agent (Brand Insights)
+@app.get("/brand-insights", response_class=HTMLResponse)
+def brand_insights():
+    with open("brand_insights.html") as f:
+        return f.read()
+
+@app.post("/brand-insights/chat")
+def brand_insights_chat(request: ChatRequest):
+    brand_insights_conversation_history.append(HumanMessage(content=request.message))
+
+    result = brand_insights_agent.invoke({"messages": brand_insights_conversation_history})
+
+    # Update history with full conversation
+    brand_insights_conversation_history.clear()
+    brand_insights_conversation_history.extend(result["messages"])
+
+    answer = result["messages"][-1].content
+    return ChatResponse(response=answer)
+
+@app.post("/brand-insights/clear")
+def clear_brand_insights():
+    brand_insights_conversation_history.clear()
     return {"status": "cleared"}

@@ -5,7 +5,7 @@ from langgraph.graph import StateGraph, END, START
 from langchain_core.messages import AnyMessage, SystemMessage, HumanMessage
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from demographics_agent import demographics_agent
+from .demographics_agent import demographics_agent
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,7 +14,7 @@ load_dotenv()
 
 from langchain_core.tools import tool
 from langchain_core.messages import HumanMessage
-from demographics_agent import demographics_agent
+from .demographics_agent import demographics_agent
 
 
 ###################subagent###############
