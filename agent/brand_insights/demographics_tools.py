@@ -51,3 +51,55 @@ def account_search(account: str, stat_type: str) -> list[dict]:
     
     return results
 
+@tool
+def fan_overlap(league_1: str, league_2:str) -> list[dict]:
+    """
+    The format is % of league_1 overtime fans are also fans of league_2
+    leagues: NBA, NFL, NCAAF, NCAAB, MLB, NHL, WNBA
+
+    Examples:
+    How many NBA overtime fans are also WNBA fans?
+    """
+    results = query("""
+        SELECT * FROM sports_overlap
+        WHERE league_primary = %s and league_secondary = %s
+    """, params=(league_1, league_2))
+    
+    return results
+
+@tool
+def sports_fandom(sport_or_league:str, metric_type:str) -> list[dict]:
+    """
+    Use this tool to understand which sports and leagues the overtime audience are avid fans of, they watch live and stream live, and which
+    sports they currently play + sports they want to play
+    sports_or_league: Football, Basketball, MMA/UFC, Boxing, Baseball, Soccer, 
+                  Gaming (e-sports), Wrestling, Motorsports, Ice Hockey, Golf, Volleyball, Tennis, Softball, 
+                Lacrosse, Pickleball, Rugby, Cricket, NFL, NBA, MLB, College Football, Men's College Basketball, FIFA World Cup, UEFA Champions League, 
+                MLS, NHL, European Soccer, Formula 1, HS Football, Copa America, Boys HS Basketball, Premier Lacrosse League, WNBA, Women's College Basketball, 
+                FIFA Women's World Cup, NWSL, UEFA Women's Champions League, European Women's Soccer, Professional Women's Hockey, Girls HS Basketball
+    metric_type: 'Avid Fandom', 'Watch Live', 'Stream Live', 'Currently Play', 'Currently + Want to Play'
+    to qualify for significant Over-Index the OT index must be 150+
+    """
+
+    results = query("""
+        SELECT * FROM sports_fandom
+        WHERE sport_league_name = %s AND metric_type = %s
+    """, params=(sport_or_league, metric_type))
+
+    return results
+
+@tool
+def audience_demographics(data_category:str) -> list[dict]:
+    """
+    Use this tool to understand the ethinicity, household income, employment, living situation, education, language, and relationshipstatus/children 
+    of the overtime sports audience
+
+    data_category: 'Ethnicity', 'Household Income', 'Employment', 'Home Ownership/Living Situation', 'Relationship Status/Children', 'Languages', 'Students/Highest Degree'
+    """
+    
+    results = query("""
+        SELECT * FROM ot_fan_demographics
+        WHERE data_category = %s
+    """, params=(data_category))
+    
+    return results
