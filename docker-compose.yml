@@ -21,6 +21,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-ots_rfp}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      DATADIR: /app/data/docs/brand_insights/brand_fam/
+    volumes:
+      - ./data:/app/data:ro
     depends_on:
       db:
         condition: service_healthy

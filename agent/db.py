@@ -154,6 +154,7 @@ def create_ot_fan_demographics_table(cur_conn):
 def init_db(debug: bool):
     conn = get_conn()
     cur = conn.cursor()
+    cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
     
     #opportunities table
     create_salesforce_opportunities(cur)
